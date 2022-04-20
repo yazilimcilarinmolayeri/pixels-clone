@@ -1,6 +1,11 @@
 # Pixels
 > An application API that allows its users to set pixels on a canvas.
 
+### Prerequisites
+- [Dotnet 6.0 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/6.0)
+  - You can install Dotnet 6.0 SDK via installer on Windows and macOS
+  - If you want to install Dotnet 6.0 SDK to Linux, check out [this](https://docs.microsoft.com/dotnet/core/install/linux?WT.mc_id=dotnet-35129-website) page.
+
 ### Installation
 - You can clone the repository using:
 ```
@@ -12,6 +17,12 @@ $ git clone https://github.com/yazilimcilarinmolayeri/pixels.git
 After you clone this repository or simply downloaded the files, you must fill in the required
 configuration fields in `appsettings.Development.json`. Then run the SQL script named
 `Structure.sql` on your **PostgreSQL** server.
+
+### Building
+You can build the project using:
+```shell
+$ dotnet build YmyPixels.sln
+```
 
 ### Endpoints
 There are few endpoints which users can use.
