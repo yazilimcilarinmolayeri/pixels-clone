@@ -18,10 +18,38 @@ After you clone this repository or simply downloaded the files, you must fill in
 configuration fields in `appsettings.Development.json`. Then run the SQL script named
 `Structure.sql` on your **PostgreSQL** server.
 
+You can change listening ports `Properties/launchSettings.json`
+Here is the default ports for each environment:
+<table>
+  <thead>
+    <th><b>Environment</b></th>
+    <th><b>HTTP</b></th>
+    <th><b>HTTPS</b></th>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Development</td>
+      <td>7000</td>
+      <td>7001</td>
+    </tr>
+    <tr>
+      <td>Production</td>
+      <td>5000</td>
+      <td>5001</td>
+    </tr>
+  </tbody>
+</table>
+
 ### Building
-You can build the project using:
+You can build the project using launch profiles.
+
+If you want to build the project using **development** environment, execute:
 ```shell
-$ dotnet build YmyPixels.sln
+$ dotnet run --launch-profile "Development"
+```
+If you want to build the project using **production** environment, execute:
+```shell
+$ dotnet run --launch-profile "Production"
 ```
 
 ### Endpoints
