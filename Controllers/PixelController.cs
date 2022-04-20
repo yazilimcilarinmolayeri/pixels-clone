@@ -1,6 +1,8 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using YmyPixels.Entities;
-using YmyPixels.Models.Pixel;
+using YmyPixels.Extensions;
 using YmyPixels.Utilities;
 
 namespace YmyPixels.Controllers;
@@ -9,6 +11,16 @@ namespace YmyPixels.Controllers;
 [Route("/api/pixel")]
 public class PixelController : Controller
 {
+    
+#pragma warning disable CS8618
+    public class SetPixelModel
+    {
+        public int X { get; set; }
+        public int Y { get; set; }
+        public string Color { get; set; }
+    }
+#pragma warning restore CS8618
+    
     private readonly Data _data;
     
     public PixelController(Data data)
@@ -54,9 +66,8 @@ public class PixelController : Controller
         });
     }
 
-    // TODO: Make SetPixel route require authentication
-    [HttpPut]
-    public async Task<IActionResult> SetPixel([FromBody] SetPixel data)
+    [HttpPut, Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    public async Task<IActionResult> SetPixel([FromBody] SetPixelModel data)
     {
         // If color data is not 6 characters
         if (data.Color.Length != 6)
@@ -64,13 +75,25 @@ public class PixelController : Controller
             {
                 error_message = "Not a hex value."
             });
+
+        // Get authenticated user and its last action date
+        var user = await _data.GetUser(User.GetDiscordId());
+        var lastActionDate = await _data.GetLastActionDate(user!.Id);
         
-        // TODO: Get authenticated user data
+        // Check user's last action date and if it is past 1 minute, continue. If not, error.
+        // If user is a moderator, it can bypass this restriction
+        if (!user.Moderator && lastActionDate.AddMinutes(1) > DateTime.Now)
+            return StatusCode(403, new
+            {
+                error_message = "It has not been 1 minute since your last action."
+            });
         
         // Declare a color value that will be parsed from user data
         int c;
 
+        // Try to convert the given hex color to an integer
         try { c = Convert.ToInt32(data.Color, 16); }
+        // If conversion fails, return a bad request error to the user
         catch (FormatException)
         {
             return BadRequest(new
@@ -79,6 +102,7 @@ public class PixelController : Controller
             });
         }
 
+        // Get current active canvas
         var canvas = await _data.GetCurrentCanvas();
         
         // If there is no active canvas
@@ -89,23 +113,29 @@ public class PixelController : Controller
             });
         
         // Check if x or y is outside the canvas
-        if(data.x > canvas.Size.X || data.y > canvas.Size.Y)
+        if(data.X > canvas.Size.X || data.Y > canvas.Size.Y)
             return BadRequest(new
             {
                 error_message = "You are trying to set a pixel that is outside of current canvases bounds."
             });
 
         // All good, set pixel of canvas
-        await _data.SetPixel(new Pixel()
+        var pixelId = await _data.SetPixel(new Pixel()
         {
-            X = data.x,
-            Y = data.y,
+            X = data.X,
+            Y = data.Y,
             Color = c,
             CanvasId = canvas.Id
         });
-        
-        // TODO: Insert user action with date information
 
+        // Log this action to the database
+        await _data.InsertAction(new Entities.Action()
+        {
+            PixelId = pixelId,
+            UserId = int.Parse(User.GetId())
+        });
+
+        // All ok, return 200
         return StatusCode(200);
     }
 }

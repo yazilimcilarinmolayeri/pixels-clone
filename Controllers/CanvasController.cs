@@ -11,16 +11,23 @@ namespace YmyPixels.Controllers;
 public class CanvasController : Controller
 {
     private readonly Data _data;
+    
     public CanvasController(Data data)
     {
         _data = data;
     }
 
-    private void BuildPixels(ref Rgb24[] pixels, ref List<Pixel> canvasPixels, ref Canvas canvas)
+    /// <summary>
+    /// Builds the canvas using given <paramref name="canvasPixels"/> information
+    /// </summary>
+    /// <param name="pixels">Image pixel information to write</param>
+    /// <param name="canvasPixels">User pixel information to read</param>
+    /// <param name="canvasWidth">Canvas' width</param>
+    private void BuildPixels(ref Rgb24[] pixels, ref List<Pixel> canvasPixels, int canvasWidth)
     {
         foreach (var t in canvasPixels)
         {
-            ref var p = ref pixels[t.Y * canvas.Size.X + t.X];
+            ref var p = ref pixels[t.Y * canvasWidth + t.X];
             p.R = (byte)(t.Color >> 16 & 0xff);
             p.G = (byte) (t.Color >> 8 & 0xff);
             p.B = (byte) (t.Color & 0xff);
@@ -51,7 +58,7 @@ public class CanvasController : Controller
             pixels[i].R = pixels[i].B = pixels[i].G = 255;
 
         // Then build pixels got from database
-        BuildPixels(ref pixels, ref canvasPixels, ref canvas);
+        BuildPixels(ref pixels, ref canvasPixels, canvas.Size.X);
         
         // Create the Image object from pixel data
         Image img = Image.LoadPixelData(pixels, canvas.Size.X, canvas.Size.Y);

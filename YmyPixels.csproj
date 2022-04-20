@@ -7,12 +7,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Npgsql" Version="7.0.0-preview.2" />
+        <PackageReference Include="AspNet.Security.OAuth.Discord" Version="6.0.5" />
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.4" />
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.OAuth" Version="2.2.0" />
+        <PackageReference Include="Npgsql" Version="7.0.0-preview.3" />
         <PackageReference Include="SixLabors.ImageSharp" Version="2.1.0" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="wwwroot" />
     </ItemGroup>
 
 </Project>

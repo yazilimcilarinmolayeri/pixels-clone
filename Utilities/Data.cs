@@ -12,17 +12,117 @@ public class Data
         var connectionString = config.GetValue<string>("ConnectionStrings:local");
         _connection = new NpgsqlConnection(connectionString);
     }
+
+    #region Action Operations
+
+    /// <summary>
+    /// Inserts a new <see cref="Entities.Action"/> object to the database
+    /// </summary>
+    /// <param name="obj"><see cref="Entities.Action"/> object to insert</param>
+    /// <returns>Id number of the inserted <see cref="Entities.Action"/></returns>
+    public async Task<int> InsertAction(Entities.Action obj)
+    {
+        NpgsqlCommand cmd =
+            new NpgsqlCommand(@"INSERT INTO ""actions"" VALUES(DEFAULT,@uid,@pid,@date) RETURNING ""id""",
+                _connection);
+        cmd.Parameters.AddWithValue("uid", obj.UserId);
+        cmd.Parameters.AddWithValue("pid", obj.PixelId);
+        cmd.Parameters.AddWithValue("date", DateTime.Now);
+        
+        _connection.Open();
+        var id = Convert.ToInt32(await cmd.ExecuteScalarAsync());
+        await _connection.CloseAsync();
+        await cmd.DisposeAsync();
+
+        return id;
+    }
+    
+    /// <summary>
+    /// Returns a user's last action date as <see cref="DateTime"/>
+    /// </summary>
+    /// <param name="userId">User's id number</param>
+    /// <returns><see cref="Entities.Action"/>'s <see cref="DateTime"/></returns>
+    public async Task<DateTime> GetLastActionDate(int userId)
+    {
+        NpgsqlCommand cmd =
+            new NpgsqlCommand(@"SELECT COALESCE(""actionDate"", (CURRENT_TIMESTAMP(0) + INTERVAL '-1 YEAR')) FROM ""actions"" WHERE ""userId""=@id ORDER BY ""actionDate"" DESC LIMIT 1",
+                _connection);
+        cmd.Parameters.AddWithValue("id", userId);
+        
+        _connection.Open();
+        var result = Convert.ToDateTime(await cmd.ExecuteScalarAsync() ?? DateTime.Now.AddYears(-1));
+        
+        await _connection.CloseAsync();
+        await cmd.DisposeAsync();
+
+        return result;
+    }
+
+    #endregion
+    
+    #region User Operations
+
+    /// <summary>
+    /// Inserts a new <see cref="User"/> to the database
+    /// </summary>
+    /// <param name="obj"><see cref="User"/> object to insert</param>
+    /// <returns>Id number of the inserted <see cref="User"/></returns>
+    public async Task<int> InsertUser(User obj)
+    {
+        NpgsqlCommand cmd =
+            new NpgsqlCommand(@"INSERT INTO ""users"" VALUES(DEFAULT,@did,DEFAULT,@ban,@mod) RETURNING ""id""",
+                _connection);
+        cmd.Parameters.AddWithValue("did", obj.DiscordId.ToString());
+        cmd.Parameters.AddWithValue("ban", obj.Banned);
+        cmd.Parameters.AddWithValue("mod", obj.Moderator);
+        
+        _connection.Open();
+        var id = Convert.ToInt32(await cmd.ExecuteScalarAsync());
+        await _connection.CloseAsync();
+        await cmd.DisposeAsync();
+
+        return id;
+    }
+
+    /// <summary>
+    /// Returns the <see cref="User"/> with the given <paramref name="discordId"/>
+    /// </summary>
+    /// <param name="discordId"><see cref="User"/>'s Discord id number</param>
+    /// <returns><see cref="User"/> object that matches with given <paramref name="discordId"/></returns>
+    public async Task<User?> GetUser(string discordId)
+    {
+        NpgsqlCommand cmd =
+            new NpgsqlCommand(@"SELECT * FROM ""users"" WHERE ""discordId""=@id",
+                _connection);
+        cmd.Parameters.AddWithValue("id", discordId);
+        
+        _connection.Open();
+        var r = cmd.ExecuteReader();
+        User? obj = null;
+        if (r.Read())
+            obj = User.FromDatabase(ref r);
+        
+        await r.CloseAsync();
+        await _connection.CloseAsync();
+        await cmd.DisposeAsync();
+        await r.DisposeAsync();
+
+        return obj;
+    }
+
+    #endregion
     
     #region Pixel Operations
 
     /// <summary>
-    /// Sets a specific <see cref="Pixel"/> on the provided <see cref="Canvas"/>
+    /// Sets a specific <see cref="Pixel"/> on the provided <see cref="Canvas"/> and returns its id number
     /// </summary>
     /// <param name="obj"><see cref="Pixel"/> data to insert (or update)</param>
-    public async Task SetPixel(Pixel obj)
+    /// <returns>Id number of the inserted/updated <see cref="Pixel"/></returns>
+    public async Task<int> SetPixel(Pixel obj)
     {
         NpgsqlCommand cmd =
-            new NpgsqlCommand(@"CALL ""SET_PIXEL""(@cid,@xpos,@ypos,@color)",
+            new NpgsqlCommand(@"SELECT ""SET_PIXEL""(@cid,@xpos,@ypos,@color)",
                 _connection);
         cmd.Parameters.AddWithValue("cid", obj.CanvasId);
         cmd.Parameters.AddWithValue("xpos", obj.X);
@@ -30,9 +130,11 @@ public class Data
         cmd.Parameters.AddWithValue("color", obj.Color);
         
         _connection.Open();
-        await cmd.ExecuteNonQueryAsync();
+        var id = Convert.ToInt32(await cmd.ExecuteScalarAsync());
         await _connection.CloseAsync();
         await cmd.DisposeAsync();
+
+        return id;
     }
 
     /// <summary>
