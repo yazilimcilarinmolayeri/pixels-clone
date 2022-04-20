@@ -1,31 +1,18 @@
 ﻿{
   "$schema": "https://json.schemastore.org/launchsettings.json",
-  "iisSettings": {
-    "windowsAuthentication": false,
-    "anonymousAuthentication": true,
-    "iisExpress": {
-      "applicationUrl": "http://localhost:39608",
-      "sslPort": 44359
-    }
-  },
   "profiles": {
-    "YmyPixels": {
+    "Development": {
       "commandName": "Project",
       "dotnetRunMessages": true,
-      "launchBrowser": true,
-      "launchUrl": "api/canvas",
-      "applicationUrl": "https://localhost:7179;http://localhost:5179",
+      "applicationUrl": "https://localhost:7000;http://localhost:7001",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "IIS Express": {
-      "commandName": "IISExpress",
-      "launchBrowser": true,
-      "launchUrl": "api/canvas",
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      }
+    "Production": {
+      "commandName": "Project",
+      "applicationUrl": "https://localhost:5000;http://localhost:5001",
+      "environmentVariables": {}
     }
   }
 }
