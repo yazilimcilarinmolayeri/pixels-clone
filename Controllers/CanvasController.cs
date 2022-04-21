@@ -34,6 +34,10 @@ public class CanvasController : Controller
         }
     }
     
+    // TODO: New route to create a canvas, requires user to be a moderator
+    
+    // TODO: New route to delete a canvas, requires user to be a moderator
+    
     [HttpGet]
     public async Task<IActionResult> Index()
     {
@@ -46,6 +50,8 @@ public class CanvasController : Controller
             {
                 error_message = "No active canvas found, try again later."
             });
+        
+        // TODO: Seperate headers 'Accept: image/webp' and 'Accept application/json'
         
         // Get all pixels of canvas
         var canvasPixels = await _data.GetPixels(canvas.Id);
