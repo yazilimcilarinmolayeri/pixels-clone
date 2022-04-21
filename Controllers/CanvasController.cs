@@ -51,7 +51,18 @@ public class CanvasController : Controller
                 error_message = "No active canvas found, try again later."
             });
         
-        // TODO: Seperate headers 'Accept: image/webp' and 'Accept application/json'
+        // If accept header has 'application/json', simply return canvases details
+        if (Request.Headers.Accept == "application/json")
+        {
+            return Ok(new
+            {
+                canvas.Id,
+                canvas.Size,
+                dateCreated = ((DateTimeOffset)canvas.DateCreated).ToUnixTimeSeconds(),
+                dateClosed = canvas.DateClosed == null ? (long?) null : ((DateTimeOffset)canvas.DateClosed).ToUnixTimeSeconds(),
+                dateExpire = ((DateTimeOffset)canvas.DateExpire).ToUnixTimeSeconds()
+            });
+        }
         
         // Get all pixels of canvas
         var canvasPixels = await _data.GetPixels(canvas.Id);

@@ -11,8 +11,9 @@
  Target Server Type    : PostgreSQL
  Target Server Version : 140002
  File Encoding         : 65001
- --------------------------------------------------------
+--------------------------------------------------------
 
+ Date: 21/04/2022 10:42:56
 */
 
 -- ----------------------------
@@ -89,10 +90,9 @@ START 1
 ),
   "sizeX" int4 NOT NULL,
   "sizeY" int4 NOT NULL,
-  "isActive" bool NOT NULL DEFAULT true,
   "dateCreated" timestamp(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
   "dateClosed" timestamp(0),
-  "dateExpire" timestamp(0)
+  "dateExpire" timestamp(0) NOT NULL
 )
 ;
 
@@ -167,12 +167,11 @@ DROP VIEW IF EXISTS "public"."GET_CURRENT_CANVAS";
 CREATE VIEW "public"."GET_CURRENT_CANVAS" AS  SELECT canvas.id,
     canvas."sizeX",
     canvas."sizeY",
-    canvas."isActive",
     canvas."dateCreated",
     canvas."dateClosed",
     canvas."dateExpire"
    FROM canvas
-  WHERE canvas."isActive" = true AND canvas."dateClosed" IS NULL AND COALESCE(canvas."dateExpire"::timestamp with time zone, CURRENT_TIMESTAMP(0) + '1 year'::interval) > CURRENT_TIMESTAMP(0)
+  WHERE canvas."dateClosed" IS NULL AND canvas."dateExpire" > CURRENT_TIMESTAMP(0)
  LIMIT 1;
 
 -- ----------------------------
@@ -180,7 +179,7 @@ CREATE VIEW "public"."GET_CURRENT_CANVAS" AS  SELECT canvas.id,
 -- ----------------------------
 ALTER SEQUENCE "public"."actions_id_seq"
 OWNED BY "public"."actions"."id";
-SELECT setval('"public"."actions_id_seq"', 19, true);
+SELECT setval('"public"."actions_id_seq"', 20, true);
 
 -- ----------------------------
 -- Alter sequences owned by

@@ -202,14 +202,13 @@ public class Data
     public async Task NewCanvas(Canvas obj)
     {
         NpgsqlCommand cmd =
-            new NpgsqlCommand("INSERT INTO `canvas` VALUES(DEFAULT,@sizex,@sizey,@active,@dcreated,@dclosed,@dexpire)",
+            new NpgsqlCommand("INSERT INTO `canvas` VALUES(DEFAULT,@sizex,@sizey,@dcreated,@dclosed,@dexpire)",
                 _connection);
         cmd.Parameters.AddWithValue("sizex", obj.Size.X);
         cmd.Parameters.AddWithValue("sizey", obj.Size.Y);
-        cmd.Parameters.AddWithValue("active", obj.Active);
         cmd.Parameters.AddWithValue("dcreated", obj.DateCreated);
         cmd.Parameters.AddWithValue("dclosed", obj.DateClosed!);
-        cmd.Parameters.AddWithValue("dexpire", obj.DateExpire!);
+        cmd.Parameters.AddWithValue("dexpire", obj.DateExpire);
         
         _connection.Open();
         await cmd.ExecuteNonQueryAsync();
