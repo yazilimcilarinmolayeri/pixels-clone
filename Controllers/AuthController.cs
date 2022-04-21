@@ -52,7 +52,7 @@ public class AuthController : Controller
             is_moderator = user.Moderator,
             discord_id = user.DiscordId,
             access_token = user.Token,
-            expire_time = DateTime.UtcNow.AddMinutes(30)
+            expire_time = DateTimeOffset.UtcNow.AddDays(1).ToUnixTimeSeconds()
         });
     }
 }
