@@ -1,5 +1,7 @@
 # Pixels
 
+<img width="250" src="https://i.imgur.com/XWnXKnU.png" align="right">
+
 An application API that allows its users to set pixels on a canvas. Like Reddit Place but for devolopers and end users. Visit the [Yazılımcıların Mola Yeri](https://discord.gg/KazHgb2) server for more information and support. Good enjoy!
 
 ### Content
