@@ -2,7 +2,7 @@
 
 # Pixels
 
-An application API that allows its users to set pixels on a canvas. Like Reddit Place but for devolopers and end users. Visit the [Yazılımcıların Mola Yeri](https://discord.gg/KazHgb2) server for more information and support. Good enjoy!
+An application API that allows its users to set pixels on a canvas. Like Reddit Place but more flexible and customizable. Visit the [Yazılımcıların Mola Yeri](https://discord.gg/KazHgb2) server for more information and support. Have fun!
 
 ### Content
 
@@ -13,6 +13,7 @@ An application API that allows its users to set pixels on a canvas. Like Reddit 
   - [Configuration](#configuration)
   - [Building](#building)
   - [Endpoints](#endpoints)
+  - [Websocket Broadcast](#websocket-broadcast)
 - Others
   - [Docs and Changelog](#docs-and-changelog)
   - [License](#license)
@@ -65,13 +66,25 @@ There are few endpoints which users can use.
   
 | Endpoint | Description |
 | - | - |
-| `/api/canvas` | Users can execute a `GET` request here to fetch currently active canvases image. |
+| `/api/canvas/{canvasId?}` | Users can execute a `GET` request here to fetch currently active canvases image. If *canvasId* is specified, will return the specified canvas. |
+| `/api/canvas/{canvasId}` | Moderators can execute a `PUT` request here with a `PutCanvasModel` object to create a new canvas. |
+| `/api/canvas/{canvasId}` | Moderators can execute a `PATCH` request here with a `PatchCanvasModel` object to update a canvas. |
+| `/api/user/{discordId}/ban` | Moderators can execute a `PATCH` request here to ban a user. A moderator cannot ban himself/herself. |
 | `/api/pixel` | Users can execute a `PUT` request here with a `SetPixelModel` object to put a pixel to currently active canvas. |
 | `/api/pixel/{x}-{y}` | Users can execute a `GET` request here to fetch the pixel information on currently active canvas. |
 | `/api/auth/login` | Users must login and get a `jwt` token from this endpoint in order to use the API. This endpoint simply redirects the user to Discord OAuth authentication page. |
 | `/api/auth/discord/callback` | Users will come to this endpoint after they authenticate with their Discord account. This endpoint will authenticate them using a `jwt` token. |
 
-Example of a `SetPixelModel` object: `{"x": 10, "y": 15, "color": "f30a2b"}`
+### Example objects
+- Example of a `SetPixelModel` object: `{"x": 10, "y": 15, "color": "f30a2b"}`
+- Example of a `PutCanvasModel` object: `{"size":{"x": 350, "y": 350}, "dateExpire": 161487240}`
+- Example of a `PatchCanvasModel` object: `{"size":{"x": 350, "y": 350}, "dateExpire": 161487240}`
+  - The keys *Size* or *DateExpire* can be null if moderators do not want to update them.
+
+## Websocket Broadcast
+
+Users can listen to the websocket (default url is `wss://localhost:<PORT>`) for pixel updates. Users must send their *jwt* tokens when connecting to websocket.
+Any updates will be sent from the server to all listeners.
 
 ## Docs and Changelog
 
