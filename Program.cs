@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using YmyPixels.Middleware;
 
 #region Configure the application and services
 
@@ -24,7 +25,8 @@ builder.Services
     .AddSingleton(jwtConfig)
     .AddSingleton(discordConfig)
     .AddTransient<Data>()
-    .AddScoped<IAuthService, AuthService>();
+    .AddSingleton<IAuthService, AuthService>()
+    .AddWebSocketManager();
 
 builder.Services
     .AddAuthentication(DiscordAuthenticationDefaults.AuthenticationScheme)
@@ -130,7 +132,11 @@ if (app.Environment.IsDevelopment())
     app.UseDeveloperExceptionPage();
 }
 
-// TODO: Add websockets support for live requests
+app.UseWebSockets(new WebSocketOptions()
+{
+    KeepAliveInterval = TimeSpan.FromMinutes(2)
+});
+app.UseWebSocketServer();
 
 app.UseHttpsRedirection();
 app.UseCookiePolicy();

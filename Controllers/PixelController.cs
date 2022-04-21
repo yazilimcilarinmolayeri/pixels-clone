@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using YmyPixels.Entities;
 using YmyPixels.Extensions;
+using YmyPixels.Middleware;
+using YmyPixels.Middleware.Models;
 using YmyPixels.Utilities;
 
 namespace YmyPixels.Controllers;
@@ -22,9 +24,11 @@ public class PixelController : Controller
 #pragma warning restore CS8618
     
     private readonly Data _data;
+    private readonly WebSocketConnectionManager _manager;
     
-    public PixelController(Data data)
+    public PixelController(Data data, WebSocketConnectionManager connectionManager)
     {
+        _manager = connectionManager;
         _data = data;
     }
     
@@ -77,7 +81,8 @@ public class PixelController : Controller
             });
 
         // Get authenticated user and its last action date
-        var user = await _data.GetUser(User.GetDiscordId());
+        string discordId = User.GetDiscordId();
+        var user = await _data.GetUser(discordId);
         var lastActionDate = await _data.GetLastActionDate(user!.Id);
         
         // Check user's last action date and if it is past 1 minute, continue. If not, error.
@@ -120,21 +125,29 @@ public class PixelController : Controller
             });
 
         // All good, set pixel of canvas
-        var pixelId = await _data.SetPixel(new Pixel()
+        var pixel = new Pixel()
         {
             X = data.X,
             Y = data.Y,
             Color = c,
             CanvasId = canvas.Id
-        });
+        };
+        pixel.Id = await _data.SetPixel(pixel);
 
         // Log this action to the database
         await _data.InsertAction(new Entities.Action()
         {
-            PixelId = pixelId,
+            PixelId = pixel.Id,
             UserId = int.Parse(User.GetId())
         });
 
+        // Send new pixel's value to all websocket listeners
+        await _manager.BroadcastPixelUpdate(new PixelUpdateData()
+        {
+            pixel = pixel,
+            discordUser = ulong.Parse(discordId)
+        });
+        
         // All ok, return 200
         return StatusCode(200);
     }

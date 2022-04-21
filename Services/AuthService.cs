@@ -19,6 +19,45 @@ public class AuthService : IAuthService
         _jwt = jwtOption;
     }
     
+    public string ValidateToken(string token, string claim) {
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwt.Secret));
+        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+        SecurityToken validatedToken;
+        var validator = new JwtSecurityTokenHandler();
+
+        // These need to match the values used to generate the token
+        TokenValidationParameters validationParameters = new TokenValidationParameters();
+        validationParameters.ValidIssuer = _jwt.Issuer;
+        validationParameters.ValidAudience = _jwt.Audience;
+        validationParameters.IssuerSigningKey = key;
+        validationParameters.ValidateIssuerSigningKey = true;
+        validationParameters.ValidateAudience = true;
+        validationParameters.ValidateLifetime = true;
+        validationParameters.ValidateIssuer = true;
+
+        if (validator.CanReadToken(token))
+        {
+            ClaimsPrincipal principal;
+            try
+            {
+                // This line throws if invalid
+                principal = validator.ValidateToken(token, validationParameters, out validatedToken);
+
+                // If we got here then the token is valid
+                if (principal.HasClaim(c => c.Type == claim))
+                {
+                    return principal.Claims.First(c => c.Type == claim).Value;
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+        }
+
+        return String.Empty;
+    }
+    
     public async Task<User> Authenticate(string discordId)
     {
         var user = await _data.GetUser(discordId);
