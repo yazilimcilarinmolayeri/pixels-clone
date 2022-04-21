@@ -83,6 +83,23 @@ public class Data
 
         return id;
     }
+    
+    public async Task<bool> UpdateUser(User obj)
+    {
+        NpgsqlCommand cmd =
+            new NpgsqlCommand(@"UPDATE ""users"" SET ""isBanned""=@ban, ""isModerator""=@mod WHERE ""id""=@id",
+                _connection);
+        cmd.Parameters.AddWithValue("ban", obj.Banned);
+        cmd.Parameters.AddWithValue("mod", obj.Moderator);
+        cmd.Parameters.AddWithValue("id", obj.Id);
+        
+        _connection.Open();
+        var id = await cmd.ExecuteNonQueryAsync();
+        await _connection.CloseAsync();
+        await cmd.DisposeAsync();
+
+        return id > 0;
+    }
 
     /// <summary>
     /// Returns the <see cref="User"/> with the given <paramref name="discordId"/>
