@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.4] - 2022-04-21
+### Added
+- `/api/user/{discordId}/ban` endpoint for moderators to allow banning users.
+- *UpdateUser* method to `Utilities/Data.cs`
+
 ## [0.0.3] - 2022-04-21
 ### Added
 - Websocket middleware for sending pixel changes live to listeners
@@ -34,7 +39,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - This CHANGELOG file to hopefully serve as an evolving example of a
   standardized open source project CHANGELOG.
 
-[Unreleased]: https://github.com/yazilimcilarinmolayeri/pixels/compare/v0.0.3...HEAD
+[Unreleased]: https://github.com/yazilimcilarinmolayeri/pixels/compare/v0.0.4...HEAD
+[0.0.4]: https://github.com/yazilimcilarinmolayeri/pixels/compare/v0.0.3...v0.0.4
 [0.0.3]: https://github.com/yazilimcilarinmolayeri/pixels/compare/v0.0.2...v0.0.3
 [0.0.2]: https://github.com/yazilimcilarinmolayeri/pixels/compare/v0.0.1...v0.0.2
 [0.0.1]: https://github.com/yazilimcilarinmolayeri/pixels/releases/tag/v0.0.1
