@@ -1,8 +1,12 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using YmyPixels.Entities;
+using YmyPixels.Extensions;
 using YmyPixels.Utilities;
+using Size = YmyPixels.Entities.Size;
 
 namespace YmyPixels.Controllers;
 
@@ -10,6 +14,19 @@ namespace YmyPixels.Controllers;
 [ApiController]
 public class CanvasController : Controller
 {
+#pragma warning disable CS8618
+    public class PutCanvasModel
+    {
+        public Size Size { get; set; }
+        public long DateExpire { get; set; }
+    }
+    public class PatchCanvasModel
+    {
+        public Size? Size { get; set; }
+        public long? DateExpire { get; set; }
+    }
+#pragma warning restore CS8618
+    
     private readonly Data _data;
     
     public CanvasController(Data data)
@@ -34,15 +51,105 @@ public class CanvasController : Controller
         }
     }
     
-    // TODO: New route to create a canvas, requires user to be a moderator
-    
-    // TODO: New route to delete a canvas, requires user to be a moderator
-    
-    [HttpGet]
-    public async Task<IActionResult> Index()
+    [HttpPut, Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    public async Task<IActionResult> Create([FromBody] PutCanvasModel data)
     {
-        // Get current active canvas
-        var canvas = await _data.GetCurrentCanvas();
+        string discordId = User.GetDiscordId();
+        User? user = await _data.GetUser(discordId);
+        
+        // If user is not a moderator
+        if(!user.Moderator)
+            return Unauthorized(new
+            {
+                error_message = "You do not have the privilege to create a canvas."
+            });
+
+        // If requested size is lower than minimum acceptable size
+        if (data.Size.X < 300 || data.Size.Y < 300)
+            return BadRequest(new
+            {
+                error_message = "Canvas' width or height cannot be lower than 300px."
+            });
+        
+        // If requested expire date is sooner than 30 minutes later
+        DateTimeOffset dateExpire = DateTimeOffset.FromUnixTimeSeconds(data.DateExpire);
+        if (dateExpire < DateTime.UtcNow.AddMinutes(30))
+            return BadRequest(new
+            {
+                error_message = "DateExpire cannot be sooner than 30 minutes later."
+            });
+        
+        // Finally, create a canvas
+        Canvas canvas = new Canvas(data.Size)
+        {
+            DateCreated = DateTime.UtcNow,
+            DateExpire = dateExpire.DateTime
+        };
+        canvas.Id = await _data.NewCanvas(canvas);
+
+        return Ok(canvas);
+    }
+
+    [HttpPatch("/api/canvas/{canvasId}"), Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    public async Task<IActionResult> Patch(int canvasId, [FromBody] PatchCanvasModel data)
+    {
+        string discordId = User.GetDiscordId();
+        User? user = await _data.GetUser(discordId);
+        
+        // If user is not a moderator
+        if(!user.Moderator)
+            return Unauthorized(new
+            {
+                error_message = "You do not have the privilege to update a canvas."
+            });
+        
+        Canvas? canvas = await _data.GetCanvas(canvasId);
+        if (canvas == null)
+            return NotFound(new
+            {
+                error_message = "Canvas not found, try again later."
+            });
+
+        if (data.Size != null)
+        {
+            // If requested size is lower than minimum acceptable size
+            if (data.Size.X < 300 || data.Size.Y < 300)
+                return BadRequest(new
+                {
+                    error_message = "Canvas' width or height cannot be lower than 300px."
+                });
+
+            canvas.Size = data.Size;
+        }
+
+        if (data.DateExpire != null)
+        {
+            // If requested expire date is sooner than 30 minutes later
+            DateTimeOffset dateExpire = DateTimeOffset.FromUnixTimeSeconds((long)data.DateExpire);
+            if (dateExpire < DateTime.UtcNow.AddMinutes(30))
+                return BadRequest(new
+                {
+                    error_message = "DateExpire cannot be sooner than 30 minutes later."
+                });
+
+            canvas.DateExpire = dateExpire.DateTime;
+        }
+
+        await _data.UpdateCanvas(canvas);
+        
+        return Ok();
+    }
+    
+    [HttpGet("/api/canvas/{canvasId?}")]
+    public async Task<IActionResult> Index(int? canvasId)
+    {
+        Canvas? canvas;
+
+        // If specific canvas is requested, search it, if not, get current active canvas.
+        if (canvasId != null)
+            canvas = await _data.GetCanvas((int)canvasId);
+        else
+            canvas = await _data.GetCurrentCanvas();
         
         // If current canvas doesn't exist
         if (canvas == null)

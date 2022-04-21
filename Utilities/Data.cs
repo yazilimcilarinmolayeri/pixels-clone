@@ -216,21 +216,41 @@ public class Data
     /// Inserts a new <see cref="Canvas"/> to database
     /// </summary>
     /// <param name="obj"><see cref="Canvas"/> object to insert</param>
-    public async Task NewCanvas(Canvas obj)
+    public async Task<int> NewCanvas(Canvas obj)
     {
         NpgsqlCommand cmd =
-            new NpgsqlCommand("INSERT INTO `canvas` VALUES(DEFAULT,@sizex,@sizey,@dcreated,@dclosed,@dexpire)",
+            new NpgsqlCommand(@"INSERT INTO ""canvas"" VALUES(DEFAULT,@sizex,@sizey,@dcreated,NULL,@dexpire) RETURNING ""id""",
                 _connection);
         cmd.Parameters.AddWithValue("sizex", obj.Size.X);
         cmd.Parameters.AddWithValue("sizey", obj.Size.Y);
         cmd.Parameters.AddWithValue("dcreated", obj.DateCreated);
-        cmd.Parameters.AddWithValue("dclosed", obj.DateClosed!);
         cmd.Parameters.AddWithValue("dexpire", obj.DateExpire);
         
         _connection.Open();
-        await cmd.ExecuteNonQueryAsync();
+        var result = Convert.ToInt32(await cmd.ExecuteScalarAsync());
         await _connection.CloseAsync();
         await cmd.DisposeAsync();
+
+        return result;
+    }
+    
+    public async Task<bool> UpdateCanvas(Canvas obj)
+    {
+        NpgsqlCommand cmd =
+            new NpgsqlCommand(@$"UPDATE ""canvas"" SET ""sizeX"" = @sizex,""sizeY"" = @sizey,{(obj.DateClosed == null ? "" : @"""dateClosed"" = @dclose,")}""dateExpire"" = @dexpire WHERE ""id"" = @id",
+                _connection);
+        cmd.Parameters.AddWithValue("sizex", obj.Size.X);
+        cmd.Parameters.AddWithValue("sizey", obj.Size.Y);
+        if (obj.DateClosed != null) cmd.Parameters.AddWithValue("dclose", obj.DateClosed);
+        cmd.Parameters.AddWithValue("dexpire", obj.DateExpire);
+        cmd.Parameters.AddWithValue("id", obj.Id);
+        
+        _connection.Open();
+        var result = await cmd.ExecuteNonQueryAsync();
+        await _connection.CloseAsync();
+        await cmd.DisposeAsync();
+
+        return result > 0;
     }
     
     /// <summary>

@@ -13,7 +13,6 @@ namespace YmyPixels.Controllers;
 [Route("/api/pixel")]
 public class PixelController : Controller
 {
-    
 #pragma warning disable CS8618
     public class SetPixelModel
     {
