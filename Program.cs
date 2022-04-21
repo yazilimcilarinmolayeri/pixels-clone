@@ -130,6 +130,8 @@ if (app.Environment.IsDevelopment())
     app.UseDeveloperExceptionPage();
 }
 
+// TODO: Add websockets support for live requests
+
 app.UseHttpsRedirection();
 app.UseCookiePolicy();
 

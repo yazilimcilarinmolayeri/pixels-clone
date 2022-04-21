@@ -34,6 +34,10 @@ public class CanvasController : Controller
         }
     }
     
+    // TODO: New route to create a canvas, requires user to be a moderator
+    
+    // TODO: New route to delete a canvas, requires user to be a moderator
+    
     [HttpGet]
     public async Task<IActionResult> Index()
     {
@@ -46,6 +50,19 @@ public class CanvasController : Controller
             {
                 error_message = "No active canvas found, try again later."
             });
+        
+        // If accept header has 'application/json', simply return canvases details
+        if (Request.Headers.Accept == "application/json")
+        {
+            return Ok(new
+            {
+                canvas.Id,
+                canvas.Size,
+                dateCreated = ((DateTimeOffset)canvas.DateCreated).ToUnixTimeSeconds(),
+                dateClosed = canvas.DateClosed == null ? (long?) null : ((DateTimeOffset)canvas.DateClosed).ToUnixTimeSeconds(),
+                dateExpire = ((DateTimeOffset)canvas.DateExpire).ToUnixTimeSeconds()
+            });
+        }
         
         // Get all pixels of canvas
         var canvasPixels = await _data.GetPixels(canvas.Id);
