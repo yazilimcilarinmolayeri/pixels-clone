@@ -123,6 +123,9 @@ public class PixelController : Controller
                 error_message = "You are trying to set a pixel that is outside of current canvases bounds."
             });
 
+        // Get snapshot of the pixel before setting new value
+        Pixel? pixelSnapshot = await _data.GetPixel(canvas.Id, data.X, data.Y);
+        
         // All good, set pixel of canvas
         var pixel = new Pixel()
         {
@@ -134,10 +137,12 @@ public class PixelController : Controller
         pixel.Id = await _data.SetPixel(pixel);
 
         // Log this action to the database
+        // If previous pixel exists, log its color. If not, log #ffffff
         await _data.InsertAction(new Entities.Action()
         {
             PixelId = pixel.Id,
-            UserId = int.Parse(User.GetId())
+            UserId = int.Parse(User.GetId()),
+            PixelSnapshotColor = pixelSnapshot?.Color ?? 0xffffff
         });
 
         // Send new pixel's value to all websocket listeners
