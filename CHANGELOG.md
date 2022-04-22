@@ -6,6 +6,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.6] - 2022-04-22
+### Added
+- *Heatmap* endpoint (GET request to `/api/canvas/{canvasId}/heatmap`)
+- *Snapshot* endpoint (GET request to `/api/canvas/{canvasId}/snapshot/{timestamp}`)
+- 2 overloads for *BuildPixels* method
+- *Snapshot* class
+- *GetActionsBetweenDates* method to `Utilities/Data.cs`
+- *GetSnapshots* method to `Utilities/Data.cs`
+- *pixelSnapshot* column to table 'actions'
+### Changed
+- Updated *GET_CURRENT_CANVAS* view
+- Updated *InsertAction* method
+- Updated *Action* class
+- Updated SetPixel endpoint (PUT request to `/api/pixel/`)
+
 ## [0.0.5] - 2022-04-21
 ### Added
 - *UpdateCanvas* method to `Utilities/Data.cs`
@@ -49,7 +64,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - This CHANGELOG file to hopefully serve as an evolving example of a
   standardized open source project CHANGELOG.
 
-[Unreleased]: https://github.com/yazilimcilarinmolayeri/pixels/compare/v0.0.5...HEAD
+[Unreleased]: https://github.com/yazilimcilarinmolayeri/pixels/compare/v0.0.6...HEAD
+[0.0.6]: https://github.com/yazilimcilarinmolayeri/pixels/compare/v0.0.5...v0.0.6
 [0.0.5]: https://github.com/yazilimcilarinmolayeri/pixels/compare/v0.0.4...v0.0.5
 [0.0.4]: https://github.com/yazilimcilarinmolayeri/pixels/compare/v0.0.3...v0.0.4
 [0.0.3]: https://github.com/yazilimcilarinmolayeri/pixels/compare/v0.0.2...v0.0.3
