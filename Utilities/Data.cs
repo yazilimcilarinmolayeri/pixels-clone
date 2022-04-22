@@ -23,11 +23,12 @@ public class Data
     public async Task<int> InsertAction(Entities.Action obj)
     {
         NpgsqlCommand cmd =
-            new NpgsqlCommand(@"INSERT INTO ""actions"" VALUES(DEFAULT,@uid,@pid,@date) RETURNING ""id""",
+            new NpgsqlCommand(@"INSERT INTO ""actions"" VALUES(DEFAULT,@uid,@pid,@date,@snapshot) RETURNING ""id""",
                 _connection);
         cmd.Parameters.AddWithValue("uid", obj.UserId);
         cmd.Parameters.AddWithValue("pid", obj.PixelId);
-        cmd.Parameters.AddWithValue("date", DateTime.Now);
+        cmd.Parameters.AddWithValue("date", DateTime.UtcNow);
+        cmd.Parameters.AddWithValue("snapshot", obj.PixelSnapshotColor);
         
         _connection.Open();
         var id = Convert.ToInt32(await cmd.ExecuteScalarAsync());
@@ -56,6 +57,51 @@ public class Data
         await cmd.DisposeAsync();
 
         return result;
+    }
+    
+    public async Task<List<Entities.Action.Snapshot>> GetActionsBetweenDates(int canvasId, long fromTimestamp, long toTimestamp)
+    {
+        NpgsqlCommand cmd =
+            new NpgsqlCommand(@"SELECT actions.*, pixel.""xPos"", pixel.""yPos"" FROM actions JOIN pixel ON actions.""pixelId"" = pixel.""id"" WHERE pixel.""canvasId"" = @cid AND ""actionDate"" >= @fdate AND ""actionDate"" <= @tdate ORDER BY ""actionDate"" ASC",
+                _connection);
+        cmd.Parameters.AddWithValue("cid", canvasId);
+        cmd.Parameters.AddWithValue("fdate", DateTimeOffset.FromUnixTimeSeconds(fromTimestamp));
+        cmd.Parameters.AddWithValue("tdate", DateTimeOffset.FromUnixTimeSeconds(toTimestamp));
+
+        _connection.Open();
+        var r = await cmd.ExecuteReaderAsync();
+        List<Entities.Action.Snapshot> list = new List<Entities.Action.Snapshot>();
+        while(r.Read())
+            list.Add(Entities.Action.Snapshot.FromDatabase(ref r));
+
+        await r.CloseAsync();
+        await _connection.CloseAsync();
+        await cmd.DisposeAsync();
+        await r.DisposeAsync();
+
+        return list;
+    }
+    
+    public async Task<List<Entities.Action.Snapshot>> GetSnapshots(int canvasId, long timestamp)
+    {
+        NpgsqlCommand cmd =
+            new NpgsqlCommand(@"SELECT actions.*, pixel.""xPos"", pixel.""yPos"" FROM actions JOIN pixel ON actions.""pixelId"" = pixel.""id"" WHERE pixel.""canvasId"" = @cid AND ""actionDate"" <= @adate ORDER BY ""actionDate"" ASC",
+                _connection);
+        cmd.Parameters.AddWithValue("cid", canvasId);
+        cmd.Parameters.AddWithValue("adate", DateTimeOffset.FromUnixTimeSeconds(timestamp));
+
+        _connection.Open();
+        var r = await cmd.ExecuteReaderAsync();
+        List<Entities.Action.Snapshot> list = new List<Entities.Action.Snapshot>();
+        while(r.Read())
+            list.Add(Entities.Action.Snapshot.FromDatabase(ref r));
+
+        await r.CloseAsync();
+        await _connection.CloseAsync();
+        await cmd.DisposeAsync();
+        await r.DisposeAsync();
+
+        return list;
     }
 
     #endregion
