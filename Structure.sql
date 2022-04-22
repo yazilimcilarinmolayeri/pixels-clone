@@ -13,7 +13,7 @@
  File Encoding         : 65001
 --------------------------------------------------------
 
- Date: 21/04/2022 10:42:56
+ Date: 22/04/2022 14:48:48
 */
 
 -- ----------------------------
@@ -73,7 +73,8 @@ START 1
 ),
   "userId" int4 NOT NULL,
   "pixelId" int4 NOT NULL,
-  "actionDate" timestamp(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0)
+  "actionDate" timestamp(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
+  "pixelSnapshot" int4 NOT NULL
 )
 ;
 
@@ -172,6 +173,7 @@ CREATE VIEW "public"."GET_CURRENT_CANVAS" AS  SELECT canvas.id,
     canvas."dateExpire"
    FROM canvas
   WHERE canvas."dateClosed" IS NULL AND canvas."dateExpire" > CURRENT_TIMESTAMP(0)
+  ORDER BY canvas."dateExpire"
  LIMIT 1;
 
 -- ----------------------------
@@ -179,28 +181,28 @@ CREATE VIEW "public"."GET_CURRENT_CANVAS" AS  SELECT canvas.id,
 -- ----------------------------
 ALTER SEQUENCE "public"."actions_id_seq"
 OWNED BY "public"."actions"."id";
-SELECT setval('"public"."actions_id_seq"', 20, true);
+SELECT setval('"public"."actions_id_seq"', 51, true);
 
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
 ALTER SEQUENCE "public"."canvas_id_seq"
 OWNED BY "public"."canvas"."id";
-SELECT setval('"public"."canvas_id_seq"', 2, true);
+SELECT setval('"public"."canvas_id_seq"', 6, true);
 
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
 ALTER SEQUENCE "public"."pixel_id_seq"
 OWNED BY "public"."pixel"."id";
-SELECT setval('"public"."pixel_id_seq"', 41, true);
+SELECT setval('"public"."pixel_id_seq"', 51, true);
 
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
 ALTER SEQUENCE "public"."users_id_seq"
 OWNED BY "public"."users"."id";
-SELECT setval('"public"."users_id_seq"', 3, true);
+SELECT setval('"public"."users_id_seq"', 4, true);
 
 -- ----------------------------
 -- Primary Key structure for table actions
