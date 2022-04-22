@@ -13,6 +13,8 @@ An application API that allows its users to set pixels on a canvas. Like Reddit 
   - [Configuration](#configuration)
   - [Building](#building)
   - [Endpoints](#endpoints)
+    - [Example objects](#example-objects)
+    - [Example query parameters](#example-query-parameters)
   - [Websocket Broadcast](#websocket-broadcast)
 - Others
   - [Docs and Changelog](#docs-and-changelog)
@@ -66,7 +68,9 @@ There are few endpoints which users can use.
   
 | Endpoint | Description |
 | - | - |
-| `/api/canvas/{canvasId?}` | Users can execute a `GET` request here to fetch currently active canvases image. If *canvasId* is specified, will return the specified canvas. |
+| `/api/canvas/{canvasId?}` | Users can execute a `GET` request here to fetch currently active canvas' image. If *canvasId* is specified, will return the specified canvas. |
+| `/api/canvas/{canvasId}/heatmap` | Users can execute a `GET` request here with *Heatmap* query parameters to get heatmap image of given canvas. |
+| `/api/canvas/{canvasId}/snapshot/{timestamp}` | Users can execute a `GET` request here to get the snapshot image of given canvas at given timestamp. |
 | `/api/canvas/{canvasId}` | Moderators can execute a `PUT` request here with a `PutCanvasModel` object to create a new canvas. |
 | `/api/canvas/{canvasId}` | Moderators can execute a `PATCH` request here with a `PatchCanvasModel` object to update a canvas. |
 | `/api/user/{discordId}/ban` | Moderators can execute a `PATCH` request here to ban a user. A moderator cannot ban himself/herself. |
@@ -80,6 +84,11 @@ There are few endpoints which users can use.
 - Example of a `PutCanvasModel` object: `{"size":{"x": 350, "y": 350}, "dateExpire": 161487240}`
 - Example of a `PatchCanvasModel` object: `{"size":{"x": 350, "y": 350}, "dateExpire": 161487240}`
   - The keys *Size* or *DateExpire* can be null if moderators do not want to update them.
+
+### Example query parameters
+- Example of *Heatmap* parameters for `/api/canvas/{canvasId}/heatmap` route: `fromTimestamp=1650626540&toTimestamp=1650626569&actionColor=65280`
+  - If `toTimestamp` is not provided, the heatmap snapshot will draw actions from `fromTimestamp` until now.
+  - If `actionColor` is not provided, the heatmap snapshot will draw action pixels with red color `(#ff0000)`
 
 ## Websocket Broadcast
 
