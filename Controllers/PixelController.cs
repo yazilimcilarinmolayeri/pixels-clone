@@ -44,7 +44,7 @@ public class PixelController : Controller
             });
         
         // Check if x or y is outside the canvas
-        if(x > canvas.Size.X || y > canvas.Size.Y)
+        if(x >= canvas.Size.X || y >= canvas.Size.Y || x < 0 || y < 0)
             return BadRequest(new
             {
                 error_message = "You are trying to get a pixel that is outside of current canvases bounds."
@@ -118,7 +118,7 @@ public class PixelController : Controller
             });
         
         // Check if x or y is outside the canvas
-        if(data.X > canvas.Size.X || data.Y > canvas.Size.Y)
+        if(data.X >= canvas.Size.X || data.Y >= canvas.Size.Y || data.X < 0 || data.Y < 0)
             return BadRequest(new
             {
                 error_message = "You are trying to set a pixel that is outside of current canvases bounds."
