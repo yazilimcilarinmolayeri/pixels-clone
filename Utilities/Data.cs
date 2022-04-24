@@ -51,7 +51,7 @@ public class Data
         cmd.Parameters.AddWithValue("id", userId);
         
         _connection.Open();
-        var result = Convert.ToDateTime(await cmd.ExecuteScalarAsync() ?? DateTime.Now.AddYears(-1));
+        var result = Convert.ToDateTime(await cmd.ExecuteScalarAsync() ?? DateTime.UtcNow.AddYears(-1));
         
         await _connection.CloseAsync();
         await cmd.DisposeAsync();

@@ -47,8 +47,7 @@ public class CanvasController : Controller
     {
         foreach (var t in canvasPixels)
         {
-            if(t.X > canvasWidth) continue;
-            if(t.Y * canvasWidth + t.X >= pixels.Length) continue;
+            if(t.X < 0 || t.Y < 0 || t.X > canvasWidth || t.Y * canvasWidth + t.X >= pixels.Length) continue;
             
             ref var p = ref pixels[t.Y * canvasWidth + t.X];
             p.R = (byte)(t.Color >> 16 & 0xff);
@@ -67,8 +66,7 @@ public class CanvasController : Controller
     {
         foreach (var t in snapshots)
         {
-            if(t.X > canvasWidth) continue;
-            if(t.Y * canvasWidth + t.X >= pixels.Length) continue;
+            if(t.X < 0 || t.Y < 0 || t.X > canvasWidth || t.Y * canvasWidth + t.X >= pixels.Length) continue;
             
             ref var p = ref pixels[t.Y * canvasWidth + t.X];
             p.R = (byte)(t.Action.PixelSnapshotColor >> 16 & 0xff);
@@ -89,8 +87,7 @@ public class CanvasController : Controller
     {
         foreach (var t in canvasPixels)
         {
-            if(t.X > canvasWidth) continue;
-            if(t.Y * canvasWidth + t.X >= pixels.Length) continue;
+            if(t.X < 0 || t.Y < 0 || t.X > canvasWidth || t.Y * canvasWidth + t.X >= pixels.Length) continue;
             
             ref var p = ref pixels[t.Y * canvasWidth + t.X];
             p.R = (byte)(colorOverride >> 16 & 0xff);

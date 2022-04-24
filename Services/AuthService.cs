@@ -12,9 +12,11 @@ public class AuthService : IAuthService
 {
     private readonly JwtOption _jwt;
     private readonly Data _data;
+    private readonly IConfiguration _config;
     
-    public AuthService(JwtOption jwtOption, Data data)
+    public AuthService(JwtOption jwtOption, Data data, IConfiguration config)
     {
+        _config = config;
         _data = data;
         _jwt = jwtOption;
     }
@@ -69,6 +71,10 @@ public class AuthService : IAuthService
             {
                 DiscordId = ulong.Parse(discordId)
             };
+
+            if (_config.GetValue<string[]>("Moderators").Contains(discordId))
+                user.Moderator = true;
+            
             user.Id = await _data.InsertUser(user);
         }
 

@@ -44,7 +44,7 @@ public class PixelController : Controller
             });
         
         // Check if x or y is outside the canvas
-        if(x > canvas.Size.X || y > canvas.Size.Y)
+        if(x >= canvas.Size.X || y >= canvas.Size.Y || x < 0 || y < 0)
             return BadRequest(new
             {
                 error_message = "You are trying to get a pixel that is outside of current canvases bounds."
@@ -65,7 +65,7 @@ public class PixelController : Controller
         {
             x = pixel.X,
             y = pixel.Y,
-            color = $"#{pixel.Color.ToString("x6")}"
+            color = pixel.Color.ToString("x6")
         });
     }
 
@@ -82,14 +82,15 @@ public class PixelController : Controller
         // Get authenticated user and its last action date
         string discordId = User.GetDiscordId();
         var user = await _data.GetUser(discordId);
-        var lastActionDate = await _data.GetLastActionDate(user!.Id);
+        var lastActionDate = new DateTimeOffset(await _data.GetLastActionDate(user!.Id));
         
         // Check user's last action date and if it is past 1 minute, continue. If not, error.
         // If user is a moderator, it can bypass this restriction
-        if (!user.Moderator && lastActionDate.AddMinutes(1) > DateTime.Now)
+        if (!user.Moderator && lastActionDate.AddMinutes(1) > DateTimeOffset.UtcNow)
             return StatusCode(403, new
             {
-                error_message = "It has not been 1 minute since your last action."
+                error_message = "It has not been 60 seconds since your last action.",
+                timeout_end = 60 - (DateTimeOffset.UtcNow.ToUnixTimeSeconds() - lastActionDate.ToUnixTimeSeconds())
             });
         
         // Declare a color value that will be parsed from user data
@@ -117,7 +118,7 @@ public class PixelController : Controller
             });
         
         // Check if x or y is outside the canvas
-        if(data.X > canvas.Size.X || data.Y > canvas.Size.Y)
+        if(data.X >= canvas.Size.X || data.Y >= canvas.Size.Y || data.X < 0 || data.Y < 0)
             return BadRequest(new
             {
                 error_message = "You are trying to set a pixel that is outside of current canvases bounds."
