@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
 using YmyPixels.Middleware;
 
 #region Configure the application and services
@@ -126,11 +127,24 @@ builder.Services.AddControllers();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
 }
+else
+{
+    // Reverse proxy channel will take care of https connections
+    // app.UseHttpsRedirection();
+}
+
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+});
+
+// Add authentication and authorization
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.UseWebSockets(new WebSocketOptions()
 {
@@ -138,12 +152,10 @@ app.UseWebSockets(new WebSocketOptions()
 });
 app.UseWebSocketServer();
 
-app.UseHttpsRedirection();
-app.UseCookiePolicy();
-
-// Add authentication and authorization
-app.UseAuthentication();
-app.UseAuthorization();
+app.UseCookiePolicy(new CookiePolicyOptions()
+{
+    MinimumSameSitePolicy = SameSiteMode.Lax
+});
 
 app.MapControllers();
 app.Run();
