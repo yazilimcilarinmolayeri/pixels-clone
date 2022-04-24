@@ -6,6 +6,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.7] - 2022-04-25
+### Added
+- Moderators configuration in `appsettings.json`, when a user registers, if configuration contains the user's Discord id, it will register the user as a moderator.
+### Changed
+- Application configuration
+### Removed
+- Hashtag (#) character in result color from get pixel endpoint
+### Fixed
+- Placing pixels outside canvas' boundaries
+- Returning timezone on getting a user's last action date
+
 ## [0.0.6] - 2022-04-22
 ### Added
 - *Heatmap* endpoint (GET request to `/api/canvas/{canvasId}/heatmap`)
@@ -64,7 +75,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - This CHANGELOG file to hopefully serve as an evolving example of a
   standardized open source project CHANGELOG.
 
-[Unreleased]: https://github.com/yazilimcilarinmolayeri/pixels/compare/v0.0.6...HEAD
+[Unreleased]: https://github.com/yazilimcilarinmolayeri/pixels/compare/v0.0.7...HEAD
+[0.0.7]: https://github.com/yazilimcilarinmolayeri/pixels/compare/v0.0.6...v0.0.7
 [0.0.6]: https://github.com/yazilimcilarinmolayeri/pixels/compare/v0.0.5...v0.0.6
 [0.0.5]: https://github.com/yazilimcilarinmolayeri/pixels/compare/v0.0.4...v0.0.5
 [0.0.4]: https://github.com/yazilimcilarinmolayeri/pixels/compare/v0.0.3...v0.0.4
